@@ -9,5 +9,7 @@ add_executable(
   log
 
   log.hpp
+  args.hpp
+
   main.cpp
 )
