@@ -4,6 +4,8 @@
 #include <string_view>
 #include <format>
 #include <iostream>
+#include <chrono>
+
 
 #if !defined(WH_LOG_MAX_ENTRY_LEN)
 #define WH_LOG_MAX_ENTRY_LEN 4096
@@ -29,8 +31,16 @@ void log_log(LogLevel level, const char* fmt, Args&&... args) {
   }
 
   char buffer[WH_LOG_MAX_ENTRY_LEN];
-  auto [end, n] = std::format_to_n(buffer, std::size(buffer) - 2, fmt,
-                                   std::forward<Args>(args)...);
+  static const std::string_view levels[] = {"TRACE", "DEBUG", "INFO", "WARN",
+                                            "ERROR"};
+  const auto now = std::chrono::utc_clock::now();
+
+  // NOTE: chrono formatter is very slow for some reason
+  auto [prefix_end, n] =
+      std::format_to_n(buffer, std::size(buffer), "{:%F %T} [{}]: ", now,
+                       levels[static_cast<int>(level)]);
+  auto [end, _n] = std::format_to_n(prefix_end, std::size(buffer) - n - 2, fmt,
+                                    std::forward<Args>(args)...);
   *end++ = '\n';
   *end = '\0';
 

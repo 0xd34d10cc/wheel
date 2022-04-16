@@ -1,9 +1,10 @@
 #pragma once
 
-#include <string>
-#include <string_view>
-#include <charconv>
 #include <vector>
+#include <string_view>
+#include <string>
+#include <charconv>
+#include <initializer_list>
 
 
 namespace wh {
@@ -23,6 +24,21 @@ class Args {
   }
 
   std::string parse(int argc, const char* argv[]) {
+    const auto concat = [](std::initializer_list<std::string_view> strs) {
+      size_t total = 0;
+      for (const auto& s : strs) {
+        total += s.size();
+      }
+
+      std::string result;
+      result.reserve(total);
+      for (const auto& s : strs) {
+        result.append(s);
+      }
+
+      return result;
+    };
+
     for (int i = 0; i < argc; ++i) {
       const auto arg = std::string_view(argv[i]);
       bool found = false;
@@ -40,10 +56,7 @@ class Args {
             case ArgType::Int: {
               ++i;
               if (i >= argc) {
-                std::string msg;
-                msg.append("No value for flag ");
-                msg.append(arg);
-                return msg;
+                return concat({"No value for flag ", arg});
               }
 
               int* p = reinterpret_cast<int*>(desc.value);
@@ -51,22 +64,16 @@ class Args {
               auto [end, ec] =
                   std::from_chars(val.data(), val.data() + val.size(), *p);
               if (ec != std::errc() || end != (val.data() + val.size())) {
-                std::string msg;
-                msg.append("Value for flag ");
-                msg.append(arg);
-                msg.append(" is invalid. Expected integer, found ");
-                msg.append(val);
-                return msg;
+                return concat({"value for flag ", arg,
+                               " is invalid (expected integer, found \"", val,
+                               "\")"});
               }
               break;
             }
             case ArgType::String: {
               ++i;
               if (i >= argc) {
-                std::string msg;
-                msg.append("No value for flag ");
-                msg.append(arg);
-                return msg;
+                return concat({"no value for flag ", arg});
               }
 
               std::string* p = reinterpret_cast<std::string*>(desc.value);
@@ -80,10 +87,7 @@ class Args {
       }
 
       if (!found) {
-        std::string msg;
-        msg.append("Unknown argument: ");
-        msg.append(arg);
-        return msg;
+        return concat({"unknown argument: ", arg});
       }
     }
 

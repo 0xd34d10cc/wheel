@@ -15,7 +15,7 @@ int main(int argc, const char* argv[]) {
   args.integer("-n", &n);
   args.string("-m", &message);
 
-  auto err = args.parse(argc - 1, argv + 1);
+  const auto err = args.parse(argc - 1, argv + 1);
   if (!err.empty()) {
     LOG_ERROR("Failed to parse arguments: {}", err);
     return EXIT_FAILURE;
