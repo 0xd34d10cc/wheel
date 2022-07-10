@@ -24,6 +24,8 @@ inline std::atomic<LogLevel> LOG_LEVEL = LogLevel::Info;
 void log_init(LogFn logger) { LOGGER = logger; }
 void log_set_level(LogLevel level) { LOG_LEVEL = level; }
 
+// TODO: remove template and use std::vformat_to & std::format_args instead
+// TODO: format to lock free ring buffer
 template <typename... Args>
 void log_log(LogLevel level, const char* fmt, Args&&... args) {
   if (level < LOG_LEVEL.load()) {

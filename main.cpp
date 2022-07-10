@@ -1,8 +1,7 @@
-#include "log.hpp"
-#include "args.hpp"
+#include "wh/log.hpp"
+#include "wh/args.hpp"
 
 #include <cstdlib>
-#include <chrono>
 
 
 int main(int argc, const char* argv[]) {
